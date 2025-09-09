@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="purplehogeのポートフォリオサイト - Web開発者のスキルとプロジェクトを紹介">
+    <title>purplehoge - Portfolio</title>
+    
+    <!-- CSS読み込み -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    
+    <!-- フォント読み込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- ヘッダー・ナビゲーション -->
+    <header class="header" id="header">
+        <nav class="header__nav">
+            <div class="header__logo">
+                <a href="#hero" class="header__logo-link">purplehoge</a>
+            </div>
+            
+            <!-- ハンバーガーメニューボタン -->
+            <button class="header__menu-toggle" id="menuToggle" aria-label="メニューの開閉">
+                <span class="header__menu-line"></span>
+                <span class="header__menu-line"></span>
+                <span class="header__menu-line"></span>
+            </button>
+            
+            <!-- ナビゲーションメニュー -->
+            <ul class="header__nav-list" id="navList">
+                <li class="header__nav-item">
+                    <a href="#hero" class="header__nav-link">Home</a>
+                </li>
+                <li class="header__nav-item">
+                    <a href="#about" class="header__nav-link">About</a>
+                </li>
+                <li class="header__nav-item">
+                    <a href="#skills" class="header__nav-link">Skills</a>
+                </li>
+                <li class="header__nav-item">
+                    <a href="#projects" class="header__nav-link">Projects</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main">
+        <!-- ヒーローセクション -->
+        <section class="hero" id="hero">
+            <div class="hero__container">
+                <div class="hero__content">
+                    <h1 class="hero__title">
+                        <span class="hero__title-main">purplehoge</span>
+                        <span class="hero__title-sub">Web Developer</span>
+                    </h1>
+                    <p class="hero__description">
+                        シンプルで美しく、機能的なWebサイトを作り続けています。<br>
+                        ユーザーの体験を第一に考えた開発を心がけています。
+                    </p>
+                    <div class="hero__actions">
+                        <a href="#projects" class="btn btn--primary">View Projects</a>
+                        <a href="#about" class="btn btn--outline">About Me</a>
+                    </div>
+                </div>
+                
+                <!-- ヒーロー画像エリア（将来的に追加検討） -->
+                <div class="hero__visual">
+                    <div class="hero__visual-placeholder">
+                        <div class="hero__visual-icon">💻</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About セクション -->
+        <section class="about" id="about">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">About Me</h2>
+                    <p class="section-subtitle">開発者として、学習者として</p>
+                </div>
+                
+                <div class="about__content">
+                    <div class="about__text">
+                        <p class="about__paragraph">
+                            こんにちは、purplehogeです。Web開発の世界で日々学習と実践を続けています。
+                        </p>
+                        <p class="about__paragraph">
+                            ユーザビリティとパフォーマンスを重視し、シンプルながら効果的なWebサイトの開発を得意としています。
+                            新しい技術やフレームワークにも積極的に取り組み、常に成長し続けることを心がけています。
+                        </p>
+                        <p class="about__paragraph">
+                            現在は、フロントエンド開発を中心に、レスポンシブデザイン、
+                            アクセシビリティ対応、パフォーマンス最適化などに特に力を入れています。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills セクション -->
+        <section class="skills" id="skills">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Skills</h2>
+                    <p class="section-subtitle">技術スタックとスキルレベル</p>
+                </div>
+                
+                <div class="skills__content" id="skillsContent">
+                    <!-- JavaScriptで動的に生成 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects セクション -->
+        <section class="projects" id="projects">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Projects</h2>
+                    <p class="section-subtitle">これまでの制作実績</p>
+                </div>
+                
+                <div class="projects__content" id="projectsContent">
+                    <!-- JavaScriptで動的に生成 -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer" id="footer">
+        <div class="container">
+            <div class="footer__content">
+                <div class="footer__text">
+                    <p class="footer__copyright">
+                        © 2024 purplehoge. Built with HTML, CSS & JavaScript.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript読み込み -->
+    <script src="js/utils.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

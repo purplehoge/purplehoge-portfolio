@@ -1,0 +1,24 @@
+# Development tools - 開発ツール固有ファイル
+.claude/
+.vscode/
+.idea/
+
+# OS generated files - OS固有ファイル
+.DS_Store
+Thumbs.db
+
+# Environment files - 環境設定ファイル（機密情報）
+.env
+.env.local
+
+# Dependencies - 依存関係（容量大）
+node_modules/
+
+# Build outputs - ビルド成果物
+dist/
+build/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
