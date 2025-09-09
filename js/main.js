@@ -89,41 +89,8 @@ const skillsData = [
 ];
 
 // プロジェクトデータ定義（フォールバック用）
-const fallbackProjectsData = [
-    {
-        id: "portfolio-website",
-        title: "ポートフォリオサイト",
-        description: "HTML、CSS、JavaScriptで構築したレスポンシブ対応のポートフォリオサイトです。モダンなデザインとアクセシビリティを重視した設計になっています。",
-        technologies: ["HTML5", "CSS3", "JavaScript", "GitHub Pages"],
-        image: null,
-        demoUrl: null,
-        sourceUrl: null,
-        status: "completed",
-        featured: true
-    },
-    {
-        id: "sample-project-1",
-        title: "Webアプリケーション",
-        description: "サンプルプロジェクトの説明です。ユーザビリティとパフォーマンスを重視した設計で、レスポンシブデザインに対応しています。",
-        technologies: ["HTML", "CSS", "JavaScript", "React"],
-        image: null,
-        demoUrl: null,
-        sourceUrl: null,
-        status: "completed",
-        featured: false
-    },
-    {
-        id: "sample-project-2",
-        title: "モバイル対応サイト",
-        description: "モバイルファーストのアプローチで開発したWebサイトです。タッチ操作とレスポンシブデザインに配慮した実装を行いました。",
-        technologies: ["HTML5", "CSS3", "JavaScript"],
-        image: null,
-        demoUrl: null,
-        sourceUrl: null,
-        status: "in-progress",
-        featured: false
-    }
-];
+// GitHubからの取得に失敗した場合のみ表示
+const fallbackProjectsData = [];
 
 // プロジェクトデータ（GitHub連携込み）
 let projectsData = [];
@@ -243,26 +210,19 @@ class PortfolioApp {
             const githubRepos = await githubApi.getRepositories();
             console.log('GitHub API連携: 取得データ', githubRepos);
             
-            // フォールバックデータと統合
-            projectsData = [...githubRepos, ...fallbackProjectsData];
-            
-            // 重複排除（GitHub APIのデータを優先）
-            const uniqueProjects = new Map();
-            projectsData.forEach(project => {
-                const key = project.title.toLowerCase();
-                if (!uniqueProjects.has(key) || project.id.startsWith('github-')) {
-                    uniqueProjects.set(key, project);
-                }
+            // GitHubデータのみを使用（フォールバックデータは統合しない）
+            projectsData = githubRepos.filter(project => {
+                // デモURLまたはソースURLが存在するプロジェクトのみ表示
+                return project.demoUrl || project.sourceUrl;
             });
-            
-            projectsData = Array.from(uniqueProjects.values());
             
             console.log(`プロジェクトデータ読み込み完了: ${projectsData.length}件`, projectsData);
             
         } catch (error) {
             console.error('GitHub API連携エラー:', error);
             ErrorHandler.log(error, 'プロジェクトデータ読み込み');
-            projectsData = fallbackProjectsData;
+            // エラー時は空配列（GitHub APIのフォールバック処理に委ねる）
+            projectsData = [];
         }
     }
     
