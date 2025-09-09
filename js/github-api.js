@@ -37,6 +37,8 @@ class GitHubApiClient {
         const cacheKey = 'user-repositories';
         
         try {
+            console.log('GitHub API: リポジトリ取得開始');
+            
             // キャッシュ確認
             const cachedData = this.getCachedData(cacheKey);
             if (cachedData) {
@@ -47,9 +49,13 @@ class GitHubApiClient {
             // API呼び出し
             this.isLoading = true;
             loadingManager.start('github-repos');
-
+            
+            console.log('GitHub API: API呼び出し実行中...');
             const repos = await this.fetchUserRepositories();
+            console.log('GitHub API: 生データ取得完了', repos);
+            
             const processedRepos = this.processRepositories(repos);
+            console.log('GitHub API: データ加工完了', processedRepos);
 
             // キャッシュに保存
             this.setCachedData(cacheKey, processedRepos);
@@ -58,6 +64,7 @@ class GitHubApiClient {
             return processedRepos;
 
         } catch (error) {
+            console.error('GitHub API エラー:', error);
             ErrorHandler.log(error, 'GitHub API リポジトリ取得');
             return this.getFallbackRepositories();
         } finally {
@@ -82,11 +89,20 @@ class GitHubApiClient {
             type: 'public'
         });
 
-        const response = await fetch(`${url}?${params}`, {
+        const fullUrl = `${url}?${params}`;
+        console.log('GitHub API: リクエストURL', fullUrl);
+
+        const response = await fetch(fullUrl, {
             headers: {
                 'Accept': 'application/vnd.github.v3+json',
                 'User-Agent': 'Portfolio-Site/1.0'
             }
+        });
+
+        console.log('GitHub API: レスポンス', {
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries())
         });
 
         if (!response.ok) {
@@ -96,7 +112,10 @@ class GitHubApiClient {
         // レート制限ヘッダーをログ出力
         this.logRateLimit(response);
 
-        return await response.json();
+        const data = await response.json();
+        console.log('GitHub API: JSON解析完了', `${data.length}件のリポジトリ`);
+        
+        return data;
     }
 
     /**
