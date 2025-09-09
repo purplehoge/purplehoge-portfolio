@@ -237,8 +237,11 @@ class PortfolioApp {
      */
     async loadProjectsData() {
         try {
+            console.log('GitHub API連携: データ取得開始');
+            
             // GitHub APIからリポジトリデータを取得
             const githubRepos = await githubApi.getRepositories();
+            console.log('GitHub API連携: 取得データ', githubRepos);
             
             // フォールバックデータと統合
             projectsData = [...githubRepos, ...fallbackProjectsData];
@@ -254,9 +257,10 @@ class PortfolioApp {
             
             projectsData = Array.from(uniqueProjects.values());
             
-            console.log(`プロジェクトデータ読み込み完了: ${projectsData.length}件`);
+            console.log(`プロジェクトデータ読み込み完了: ${projectsData.length}件`, projectsData);
             
         } catch (error) {
+            console.error('GitHub API連携エラー:', error);
             ErrorHandler.log(error, 'プロジェクトデータ読み込み');
             projectsData = fallbackProjectsData;
         }
