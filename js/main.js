@@ -212,8 +212,15 @@ class PortfolioApp {
             
             // GitHubデータのみを使用（フォールバックデータは統合しない）
             projectsData = githubRepos.filter(project => {
-                // デモURLまたはソースURLが存在するプロジェクトのみ表示
-                return project.demoUrl || project.sourceUrl;
+                // より厳密なフィルタリング条件
+                const hasDemo = project.demoUrl && project.demoUrl.trim() !== '';
+                const hasValidSource = project.sourceUrl && project.sourceUrl.trim() !== '';
+                const isNotReadmeOnly = !project.title.toLowerCase().includes('readme');
+                const isNotConfigOnly = !project.title.toLowerCase().includes('config');
+                const isNotPrivateProfile = project.title.toLowerCase() !== 'purplehoge';
+                
+                // デモサイトがあるか、有効なソースでかつ実用的なリポジトリ
+                return (hasDemo || hasValidSource) && isNotReadmeOnly && isNotConfigOnly && isNotPrivateProfile;
             });
             
             console.log(`プロジェクトデータ読み込み完了: ${projectsData.length}件`, projectsData);
