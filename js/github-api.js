@@ -317,26 +317,8 @@ class GitHubApiClient {
     getFallbackRepositories() {
         console.warn('GitHub API: フォールバックデータを使用');
         
-        return [
-            {
-                id: 'fallback-portfolio',
-                title: 'Portfolio Website',
-                description: 'HTML、CSS、JavaScriptで構築したレスポンシブ対応のポートフォリオサイト',
-                technologies: ['HTML5', 'CSS3', 'JavaScript', 'GitHub Pages'],
-                image: null,
-                demoUrl: 'https://purplehoge.github.io/purplehoge-portfolio/',
-                sourceUrl: 'https://github.com/purplehoge/purplehoge-portfolio',
-                status: 'completed',
-                featured: true,
-                githubData: {
-                    stars: 0,
-                    language: 'HTML',
-                    updatedAt: new Date(),
-                    createdAt: new Date(),
-                    topics: ['portfolio', 'javascript', 'html', 'css']
-                }
-            }
-        ];
+        // GitHub API障害時も不要なプロジェクトは表示しない
+        return [];
     }
 
     /**
