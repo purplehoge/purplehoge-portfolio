@@ -88,8 +88,8 @@ const skillsData = [
     }
 ];
 
-// プロジェクトデータ定義
-const projectsData = [
+// プロジェクトデータ定義（フォールバック用）
+const fallbackProjectsData = [
     {
         id: "portfolio-website",
         title: "ポートフォリオサイト",
@@ -124,6 +124,9 @@ const projectsData = [
         featured: false
     }
 ];
+
+// プロジェクトデータ（GitHub連携込み）
+let projectsData = [];
 
 /**
  * メインアプリケーションクラス
@@ -212,14 +215,51 @@ class PortfolioApp {
     
     /**
      * データの読み込み
+     * GitHub APIからプロジェクトデータを取得し、レンダリング
      * @private
      * @returns {Promise<void>}
      */
     async loadData() {
         await Promise.all([
-            this.renderSkills(),
-            this.renderProjects()
+            this.loadProjectsData(),
+            this.renderSkills()
         ]);
+        
+        // プロジェクトデータ取得後にレンダリング
+        await this.renderProjects();
+    }
+    
+    /**
+     * プロジェクトデータの読み込み
+     * GitHub APIからリポジトリ情報を取得
+     * @private
+     * @returns {Promise<void>}
+     */
+    async loadProjectsData() {
+        try {
+            // GitHub APIからリポジトリデータを取得
+            const githubRepos = await githubApi.getRepositories();
+            
+            // フォールバックデータと統合
+            projectsData = [...githubRepos, ...fallbackProjectsData];
+            
+            // 重複排除（GitHub APIのデータを優先）
+            const uniqueProjects = new Map();
+            projectsData.forEach(project => {
+                const key = project.title.toLowerCase();
+                if (!uniqueProjects.has(key) || project.id.startsWith('github-')) {
+                    uniqueProjects.set(key, project);
+                }
+            });
+            
+            projectsData = Array.from(uniqueProjects.values());
+            
+            console.log(`プロジェクトデータ読み込み完了: ${projectsData.length}件`);
+            
+        } catch (error) {
+            ErrorHandler.log(error, 'プロジェクトデータ読み込み');
+            projectsData = fallbackProjectsData;
+        }
     }
     
     /**
@@ -363,15 +403,35 @@ class PortfolioApp {
                             `<div class="project-card__placeholder">📁</div>`
                         }
                         ${project.featured ? '<div class="project-card__badge">Featured</div>' : ''}
+                        ${project.githubData ? `
+                            <div class="project-card__github-info">
+                                ${project.githubData.stars > 0 ? `<span class="github-stars">⭐ ${project.githubData.stars}</span>` : ''}
+                                ${project.githubData.language ? `<span class="github-language">${escapeHtml(project.githubData.language)}</span>` : ''}
+                            </div>
+                        ` : ''}
                     </div>
                     <div class="project-card__content">
                         <h3 class="project-card__title">${escapeHtml(project.title)}</h3>
                         <p class="project-card__description">${escapeHtml(project.description)}</p>
+                        ${project.githubData && project.githubData.topics.length > 0 ? `
+                            <div class="project-card__topics">
+                                ${project.githubData.topics.slice(0, 3).map(topic => 
+                                    `<span class="project-card__topic">#${escapeHtml(topic)}</span>`
+                                ).join('')}
+                            </div>
+                        ` : ''}
                         <div class="project-card__technologies">
                             ${project.technologies.map(tech => 
                                 `<span class="project-card__tech">${escapeHtml(tech)}</span>`
                             ).join('')}
                         </div>
+                        ${project.githubData ? `
+                            <div class="project-card__meta">
+                                <small class="project-card__updated">
+                                    更新: ${formatDate(project.githubData.updatedAt, 'YYYY/MM/DD')}
+                                </small>
+                            </div>
+                        ` : ''}
                         <div class="project-card__actions">
                             ${project.demoUrl ? 
                                 `<a href="${escapeHtml(project.demoUrl)}" class="project-card__link project-card__link--primary" target="_blank" rel="noopener noreferrer">Demo</a>` : 
