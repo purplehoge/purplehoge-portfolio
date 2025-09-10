@@ -134,7 +134,7 @@ class GitHubApiClient {
                 description: repo.description || '説明がありません',
                 technologies: this.extractTechnologies(repo),
                 image: null, // 将来的にOGP画像など追加検討
-                demoUrl: repo.homepage || null,
+                demoUrl: this.getDemoUrl(repo),
                 sourceUrl: repo.html_url,
                 status: 'completed',
                 featured: this.isFeaturedRepo(repo),
@@ -222,6 +222,161 @@ class GitHubApiClient {
         
         const normalized = nameMap[tech.toLowerCase()];
         return normalized || tech.charAt(0).toUpperCase() + tech.slice(1);
+    }
+
+    /**
+     * デモURLを取得（Vercel優先、なければGitHub Pages）
+     * @private
+     * @param {Object} repo - リポジトリデータ
+     * @returns {string|null} デモURL
+     */
+    getDemoUrl(repo) {
+        // 1. repo.homepage がある場合、まずそれを確認
+        if (repo.homepage) {
+            const homepage = repo.homepage.trim();
+            
+            // Vercelドメインの場合は最優先
+            if (this.isVercelUrl(homepage)) {
+                return homepage;
+            }
+            
+            // 他のデプロイサービスも有効とみなす
+            if (this.isValidDeployUrl(homepage)) {
+                return homepage;
+            }
+        }
+        
+        // 2. GitHub Pagesの確認
+        const githubPagesUrl = this.getGitHubPagesUrl(repo);
+        if (githubPagesUrl) {
+            return githubPagesUrl;
+        }
+        
+        // 3. homepageがあったが無効だった場合
+        if (repo.homepage && repo.homepage.trim()) {
+            return repo.homepage.trim();
+        }
+        
+        return null;
+    }
+
+    /**
+     * VercelのURLかどうか判定
+     * @private
+     * @param {string} url - チェックするURL
+     * @returns {boolean} VercelのURLかどうか
+     */
+    isVercelUrl(url) {
+        const vercelDomains = [
+            'vercel.app',
+            'vercel.com',
+            'now.sh'
+        ];
+        
+        try {
+            const urlObj = new URL(url);
+            return vercelDomains.some(domain => 
+                urlObj.hostname.endsWith(domain)
+            );
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * 有効なデプロイURLかどうか判定
+     * @private
+     * @param {string} url - チェックするURL
+     * @returns {boolean} 有効なデプロイURLかどうか
+     */
+    isValidDeployUrl(url) {
+        const deployDomains = [
+            'netlify.app',
+            'netlify.com',
+            'herokuapp.com',
+            'github.io',
+            'pages.dev', // Cloudflare Pages
+            'railway.app',
+            'surge.sh'
+        ];
+        
+        try {
+            const urlObj = new URL(url);
+            // HTTPまたはHTTPS
+            if (!['http:', 'https:'].includes(urlObj.protocol)) {
+                return false;
+            }
+            
+            // デプロイサービスのドメインチェック
+            return deployDomains.some(domain => 
+                urlObj.hostname.endsWith(domain)
+            );
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * GitHub PagesのURLを生成
+     * @private
+     * @param {Object} repo - リポジトリデータ
+     * @returns {string|null} GitHub PagesのURL
+     */
+    getGitHubPagesUrl(repo) {
+        const username = GITHUB_CONFIG.USERNAME;
+        const repoName = repo.name;
+        
+        // ユーザーサイト（username.github.io）の場合
+        if (repoName === `${username}.github.io`) {
+            return `https://${username}.github.io/`;
+        }
+        
+        // プロジェクトサイトの場合
+        // GitHub Pagesが有効かどうかの確認は難しいため、
+        // 一般的なパターンでURLを生成
+        const githubPagesUrl = `https://${username}.github.io/${repoName}/`;
+        
+        // リポジトリに index.html または README.md が存在する可能性が高い場合のみ返す
+        // ここでは簡易的に、特定の条件を満たす場合のみGitHub Pages URLを返す
+        if (this.likelyHasGitHubPages(repo)) {
+            return githubPagesUrl;
+        }
+        
+        return null;
+    }
+
+    /**
+     * GitHub Pagesが有効である可能性が高いかどうか判定
+     * @private
+     * @param {Object} repo - リポジトリデータ
+     * @returns {boolean} GitHub Pagesが有効である可能性
+     */
+    likelyHasGitHubPages(repo) {
+        const repoName = repo.name.toLowerCase();
+        const description = (repo.description || '').toLowerCase();
+        const topics = repo.topics || [];
+        
+        // 1. 明確にWebサイト関連のリポジトリ
+        const webKeywords = [
+            'website', 'site', 'page', 'portfolio', 'blog', 'docs',
+            'documentation', 'demo', 'landing', 'web'
+        ];
+        
+        const hasWebKeyword = 
+            webKeywords.some(keyword => repoName.includes(keyword)) ||
+            webKeywords.some(keyword => description.includes(keyword)) ||
+            topics.some(topic => webKeywords.includes(topic.toLowerCase()));
+        
+        // 2. フロントエンド技術を使用
+        const frontendTech = ['html', 'css', 'javascript', 'react', 'vue'];
+        const hasFrontendTech = 
+            frontendTech.includes(repo.language?.toLowerCase()) ||
+            topics.some(topic => frontendTech.includes(topic.toLowerCase()));
+        
+        // 3. GitHub Pagesトピックが明示的に設定されている
+        const hasGitHubPagesTopic = topics.includes('github-pages');
+        
+        return hasWebKeyword || hasFrontendTech || hasGitHubPagesTopic;
     }
 
     /**
